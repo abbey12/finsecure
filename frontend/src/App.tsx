@@ -8,6 +8,13 @@ import UserDashboard from './pages/UserDashboard';
 import UserProfile from './pages/UserProfile';
 import Transactions from './pages/Transactions';
 import CreateTransaction from './pages/CreateTransaction';
+import Analytics from './pages/Analytics';
+import Verifications from './pages/Verifications';
+import Rules from './pages/Rules';
+import Users from './pages/Users';
+import Alerts from './pages/Alerts';
+import UserTransactions from './pages/UserTransactions';
+import UserAlerts from './pages/UserAlerts';
 import { UserRole } from './types';
 
 // Protected Route component
@@ -81,10 +88,52 @@ const AppRoutes: React.FC = () => {
           </RoleBasedRoute>
         } />
         
+        <Route path="my-transactions" element={
+          <RoleBasedRoute allowedRoles={[UserRole.REGULAR]}>
+            <UserTransactions />
+          </RoleBasedRoute>
+        } />
+
+        <Route path="my-alerts" element={
+          <RoleBasedRoute allowedRoles={[UserRole.REGULAR]}>
+            <UserAlerts />
+          </RoleBasedRoute>
+        } />
+        
         {/* Admin/Analyst Routes */}
         <Route path="transactions" element={
           <RoleBasedRoute allowedRoles={[UserRole.ADMIN, UserRole.ANALYST]}>
             <Transactions />
+          </RoleBasedRoute>
+        } />
+        
+        <Route path="alerts" element={
+          <RoleBasedRoute allowedRoles={[UserRole.ADMIN, UserRole.ANALYST]}>
+            <Alerts />
+          </RoleBasedRoute>
+        } />
+
+        <Route path="users" element={
+          <RoleBasedRoute allowedRoles={[UserRole.ADMIN, UserRole.ANALYST]}>
+            <Users />
+          </RoleBasedRoute>
+        } />
+
+        <Route path="rules" element={
+          <RoleBasedRoute allowedRoles={[UserRole.ADMIN, UserRole.ANALYST]}>
+            <Rules />
+          </RoleBasedRoute>
+        } />
+
+        <Route path="verifications" element={
+          <RoleBasedRoute allowedRoles={[UserRole.ADMIN, UserRole.ANALYST]}>
+            <Verifications />
+          </RoleBasedRoute>
+        } />
+
+        <Route path="analytics" element={
+          <RoleBasedRoute allowedRoles={[UserRole.ADMIN, UserRole.ANALYST]}>
+            <Analytics />
           </RoleBasedRoute>
         } />
         

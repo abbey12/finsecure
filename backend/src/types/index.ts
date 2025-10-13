@@ -118,6 +118,28 @@ export interface Alert {
   updatedAt: string;
 }
 
+// Rule Configuration Types
+export enum RuleType {
+  AMOUNT_THRESHOLD = 'amount_threshold',
+  VELOCITY_LIMIT = 'velocity_limit',
+  LOCATION_ANOMALY = 'location_anomaly',
+  DEVICE_CHANGE = 'device_change',
+  NEW_PAYEE = 'new_payee',
+  TIME_ANOMALY = 'time_anomaly',
+}
+
+export interface RuleConfig {
+  id: string;
+  name: string;
+  description: string;
+  type: RuleType;
+  parameters: Record<string, any>;
+  isActive: boolean;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Dashboard Types
 export interface DashboardStats {
   totalTransactions: number;
@@ -140,6 +162,30 @@ export interface DashboardStats {
     high: number;
     critical: number;
   };
+}
+
+// Verification Types
+export enum VerificationMethod {
+  ID_SCAN = 'id_scan',
+  LIVENESS = 'liveness',
+  SELFIE = 'selfie',
+}
+
+export enum VerificationResult {
+  SUCCESS = 'success',
+  PENDING = 'pending',
+  FAILED = 'failed',
+  EXPIRED = 'expired',
+}
+
+export interface VerificationAttempt {
+  id: string;
+  userId: string;
+  method: VerificationMethod;
+  result: VerificationResult;
+  attemptsCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // API Response Types

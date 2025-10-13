@@ -30,12 +30,12 @@ const UserDashboard: React.FC = () => {
     const fetchUserData = async () => {
       try {
         // Fetch user's recent transactions
-        const transactionsResponse = await transactionsAPI.getTransactions({}, 1, 5);
-        setRecentTransactions(transactionsResponse.data || []);
+        const transactionsResponse = await transactionsAPI.getTransactions({ userId: user?.id }, 1, 5);
+        setRecentTransactions(transactionsResponse.data.data || []);
 
         // Fetch user's personal alerts
-        const alertsResponse = await alertsAPI.getAlerts({}, 1, 5);
-        setPersonalAlerts(alertsResponse.data || []);
+        const alertsResponse = await alertsAPI.getAlerts({ userId: user?.id }, 1, 5);
+        setPersonalAlerts(alertsResponse.data.data || []);
 
         // Fetch transaction chart data for the user
         const chartResponse = await dashboardAPI.getTransactionChart(7);
@@ -252,7 +252,10 @@ const UserDashboard: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Recent Transactions</h3>
-            <button className="text-sm text-primary-600 hover:text-primary-500">
+            <button 
+              onClick={() => navigate('/my-transactions')}
+              className="text-sm text-primary-600 hover:text-primary-500"
+            >
               View All
             </button>
           </div>
@@ -310,7 +313,15 @@ const UserDashboard: React.FC = () => {
       {personalAlerts.length > 0 && (
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Security Alerts</h3>
+            <button 
+              onClick={() => navigate('/my-alerts')}
+              className="text-sm text-primary-600 hover:text-primary-500"
+            >
+              View All
+            </button>
+            </div>
           </div>
           <div className="divide-y divide-gray-200">
             {personalAlerts.map((alert) => (

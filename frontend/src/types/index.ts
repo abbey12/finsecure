@@ -336,9 +336,16 @@ export interface AlertFilters {
   severity?: AlertSeverity;
   status?: AlertStatus;
   type?: AlertType;
+  userId?: string; // Add userId to filter alerts by user
   dateRange?: {
     start: string;
     end: string;
   };
   assignee?: string;
+}
+
+export interface UserFilters {
+  role?: UserRole;
+  status?: UserStatus;
+  search?: string; // Optional: for searching by name or email
 } 

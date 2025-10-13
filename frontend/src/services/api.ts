@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { 
-  ApiResponse, 
+import {
+  ApiResponse,
   PaginatedResponse,
   User,
   Transaction,
@@ -13,14 +13,17 @@ import {
   BehaviorProfile,
   Device,
   UserRole,
-  CreateTransactionRequest
+  CreateTransactionRequest,
+  UserFilters,
+  VerificationMethod,
+  VerificationResult
 } from '../types';
-import { 
-  mockTransactions, 
-  mockAlerts, 
-  mockDashboardStats, 
-  mockChartData, 
-  mockRiskDistribution 
+import {
+  mockTransactions,
+  mockAlerts,
+  mockDashboardStats,
+  mockChartData,
+  mockRiskDistribution
 } from './mockData';
 
 // Create axios instance with default configuration
@@ -68,12 +71,12 @@ const USE_MOCK_DATA = false;
 // Auth API
 export const authAPI = {
   signup: async (email: string, password: string, firstName: string, lastName: string, role?: string): Promise<ApiResponse<{ token: string; user: User }>> => {
-    const response = await api.post('/auth/signup', { 
-      email, 
-      password, 
-      firstName, 
-      lastName, 
-      role: role || 'regular' 
+    const response = await api.post('/auth/signup', {
+      email,
+      password,
+      firstName,
+      lastName,
+      role: role || 'regular'
     });
     return response.data;
   },
@@ -107,10 +110,10 @@ export const authAPI = {
 
 // Transactions API
 export const transactionsAPI = {
-  getTransactions: async (filters?: TransactionFilters, page = 1, limit = 20): Promise<PaginatedResponse<Transaction>> => {
+  getTransactions: async (filters?: TransactionFilters, page = 1, limit = 20): Promise<ApiResponse<PaginatedResponse<Transaction>>> => {
     const params = { page, limit, ...filters };
     const response = await api.get('/transactions', { params });
-    return response.data.data;
+    return response.data;
   },
 
   getTransaction: async (id: string): Promise<ApiResponse<Transaction>> => {
@@ -131,7 +134,7 @@ export const transactionsAPI = {
 
 // Alerts API
 export const alertsAPI = {
-  getAlerts: async (filters?: AlertFilters, page = 1, limit = 20): Promise<PaginatedResponse<Alert>> => {
+  getAlerts: async (filters?: AlertFilters, page = 1, limit = 20): Promise<ApiResponse<PaginatedResponse<Alert>>> => {
     const params = { page, limit, ...filters };
     const response = await api.get('/alerts', { params });
     return response.data;
@@ -160,8 +163,9 @@ export const alertsAPI = {
 
 // Users API
 export const usersAPI = {
-  getUsers: async (page = 1, limit = 20): Promise<PaginatedResponse<User>> => {
-    const response = await api.get('/users', { params: { page, limit } });
+  getUsers: async (page = 1, limit = 20, filters?: UserFilters): Promise<ApiResponse<PaginatedResponse<User>>> => {
+    const params = { page, limit, ...filters };
+    const response = await api.get('/users', { params });
     return response.data;
   },
 
@@ -274,8 +278,9 @@ export const verificationAPI = {
     return response.data;
   },
 
-  getVerificationHistory: async (userId: string): Promise<ApiResponse<VerificationAttempt[]>> => {
-    const response = await api.get(`/users/${userId}/verifications`);
+  getVerificationHistory: async (userId: string, page = 1, limit = 10, filters?: { method?: VerificationMethod, result?: VerificationResult }): Promise<ApiResponse<PaginatedResponse<VerificationAttempt>>> => {
+    const params = { page, limit, ...filters };
+    const response = await api.get(`/verification/users/${userId}/verifications`, { params });
     return response.data;
   },
 };

@@ -11,7 +11,10 @@ import {
   UserRole,
   UserStatus,
   LocationSource,
-  TransactionStatus
+  TransactionStatus,
+  VerificationAttempt,
+  VerificationMethod,
+  VerificationResult
 } from '../types';
 
 // Mock Users with hashed passwords
@@ -279,4 +282,53 @@ export const mockRiskDistribution = [
   { name: 'Low Risk', value: 12000 },
   { name: 'Medium Risk', value: 2800 },
   { name: 'High Risk', value: 620 }
+];
+
+// Mock Verification Attempts
+export const mockVerificationAttempts: VerificationAttempt[] = [
+  {
+    id: 'ver_001',
+    userId: '1',
+    method: VerificationMethod.ID_SCAN,
+    result: VerificationResult.SUCCESS,
+    attemptsCount: 1,
+    createdAt: new Date('2024-01-20T10:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-20T10:05:00Z').toISOString(),
+  },
+  {
+    id: 'ver_002',
+    userId: '2',
+    method: VerificationMethod.LIVENESS,
+    result: VerificationResult.PENDING,
+    attemptsCount: 1,
+    createdAt: new Date('2024-01-20T11:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-20T11:00:00Z').toISOString(),
+  },
+  {
+    id: 'ver_003',
+    userId: '3',
+    method: VerificationMethod.SELFIE,
+    result: VerificationResult.FAILED,
+    attemptsCount: 2,
+    createdAt: new Date('2024-01-20T12:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-20T12:10:00Z').toISOString(),
+  },
+  {
+    id: 'ver_004',
+    userId: '1',
+    method: VerificationMethod.LIVENESS,
+    result: VerificationResult.EXPIRED,
+    attemptsCount: 1,
+    createdAt: new Date('2024-01-21T09:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-21T09:05:00Z').toISOString(),
+  },
+  {
+    id: 'ver_005',
+    userId: '2',
+    method: VerificationMethod.ID_SCAN,
+    result: VerificationResult.SUCCESS,
+    attemptsCount: 1,
+    createdAt: new Date('2024-01-21T14:00:00Z').toISOString(),
+    updatedAt: new Date('2024-01-21T14:02:00Z').toISOString(),
+  },
 ];

@@ -11,6 +11,8 @@ import transactionRoutes from './routes/transactions';
 import userRoutes from './routes/users';
 import alertRoutes from './routes/alerts';
 import dashboardRoutes from './routes/dashboard';
+import rulesRoutes from './routes/rules';
+import verificationRoutes from './routes/verification';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -63,6 +65,8 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/rules', rulesRoutes);
+app.use('/api/verification', verificationRoutes);
 
 // Error handling middleware
 app.use(notFound);
