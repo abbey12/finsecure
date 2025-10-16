@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mockVerificationAttempts = exports.mockRiskDistribution = exports.mockChartData = exports.mockDashboardStats = exports.mockAlerts = exports.mockTransactions = exports.mockUsers = void 0;
+exports.removeTransaction = exports.addTransaction = exports.getTransactionCount = exports.clearAllTransactions = exports.mockVerificationAttempts = exports.mockRiskDistribution = exports.mockChartData = exports.mockDashboardStats = exports.mockAlerts = exports.mockTransactions = exports.mockUsers = void 0;
 const types_1 = require("../types");
 exports.mockUsers = [
     {
@@ -313,4 +313,26 @@ exports.mockVerificationAttempts = [
         completedAt: new Date('2024-01-21T14:02:00Z').toISOString(),
     },
 ];
+const clearAllTransactions = () => {
+    exports.mockTransactions = [];
+    console.log('All transactions have been cleared from the database');
+};
+exports.clearAllTransactions = clearAllTransactions;
+const getTransactionCount = () => {
+    return exports.mockTransactions.length;
+};
+exports.getTransactionCount = getTransactionCount;
+const addTransaction = (transaction) => {
+    exports.mockTransactions.push(transaction);
+};
+exports.addTransaction = addTransaction;
+const removeTransaction = (transactionId) => {
+    const index = exports.mockTransactions.findIndex(t => t.id === transactionId);
+    if (index !== -1) {
+        exports.mockTransactions.splice(index, 1);
+        return true;
+    }
+    return false;
+};
+exports.removeTransaction = removeTransaction;
 //# sourceMappingURL=mockData.js.map

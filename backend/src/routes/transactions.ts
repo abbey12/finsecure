@@ -399,4 +399,38 @@ router.get('/:id/events', [
   }
 });
 
+// Clear all transactions (Admin only)
+router.delete('/clear-all', async (req, res) => {
+  try {
+    // Import the clear function
+    const { clearAllTransactions, getTransactionCount } = await import('../services/mockData');
+    
+    // Get count before clearing
+    const countBefore = getTransactionCount();
+    
+    // Clear all transactions
+    clearAllTransactions();
+    
+    const response: ApiResponse<{
+      clearedCount: number;
+      message: string;
+    }> = {
+      success: true,
+      data: {
+        clearedCount: countBefore,
+        message: `Successfully cleared ${countBefore} transactions from the database`
+      },
+      message: 'All transactions have been cleared'
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Clear all transactions error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 export default router;

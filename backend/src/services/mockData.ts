@@ -59,7 +59,7 @@ export const mockUsers: User[] = [
 ];
 
 // Mock Transactions with Ghana context
-export const mockTransactions: Transaction[] = [
+export let mockTransactions: Transaction[] = [
   {
     id: 'txn_001',
     userId: 'user_001',
@@ -341,3 +341,26 @@ export const mockVerificationAttempts: VerificationAttempt[] = [
     completedAt: new Date('2024-01-21T14:02:00Z').toISOString(),
   },
 ];
+
+// Database management functions
+export const clearAllTransactions = (): void => {
+  mockTransactions = [];
+  console.log('All transactions have been cleared from the database');
+};
+
+export const getTransactionCount = (): number => {
+  return mockTransactions.length;
+};
+
+export const addTransaction = (transaction: Transaction): void => {
+  mockTransactions.push(transaction);
+};
+
+export const removeTransaction = (transactionId: string): boolean => {
+  const index = mockTransactions.findIndex(t => t.id === transactionId);
+  if (index !== -1) {
+    mockTransactions.splice(index, 1);
+    return true;
+  }
+  return false;
+};
