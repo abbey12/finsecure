@@ -1,6 +1,6 @@
 import express from 'express';
 import { query, validationResult } from 'express-validator';
-import { mockDashboardStats, mockChartData, mockRiskDistribution } from '../services/mockData';
+import { DashboardService } from '../services/dashboardService';
 import { ApiResponse, DashboardStats } from '../types';
 
 const router = express.Router();
@@ -8,9 +8,11 @@ const router = express.Router();
 // Get dashboard stats
 router.get('/stats', async (req, res) => {
   try {
+    const realStats = DashboardService.getRealStats();
+    
     const response: ApiResponse<DashboardStats> = {
       success: true,
-      data: mockDashboardStats
+      data: realStats
     };
 
     res.json(response);
@@ -39,19 +41,8 @@ router.get('/chart/transactions', [
 
     const days = parseInt(req.query.days as string) || 7;
     
-    // Generate mock data for the specified number of days
-    const chartData: Array<{date: string, value: number}> = [];
-    const today = new Date();
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      chartData.push({
-        date: date.toISOString().split('T')[0],
-        value: Math.floor(Math.random() * 200) + 50 // Random value between 50-250
-      });
-    }
+    // Get real transaction data for the specified number of days
+    const chartData = DashboardService.getTransactionChartData(days);
 
     const response: ApiResponse<any> = {
       success: true,
@@ -73,9 +64,11 @@ router.get('/chart/transactions', [
 // Get risk distribution data
 router.get('/chart/risk-distribution', async (req, res) => {
   try {
+    const realRiskData = DashboardService.getRiskDistributionData();
+    
     const response: ApiResponse<any[]> = {
       success: true,
-      data: mockRiskDistribution
+      data: realRiskData
     };
 
     res.json(response);
@@ -104,21 +97,8 @@ router.get('/chart/decisions', [
 
     const days = parseInt(req.query.days as string) || 7;
     
-    // Generate mock decision data for the specified number of days
-    const decisionData: Array<{date: string, allow: number, challenge: number, deny: number}> = [];
-    const today = new Date();
-    
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      decisionData.push({
-        date: date.toISOString().split('T')[0],
-        allow: Math.floor(Math.random() * 100) + 50,
-        challenge: Math.floor(Math.random() * 20) + 5,
-        deny: Math.floor(Math.random() * 10) + 1
-      });
-    }
+    // Get real decision data for the specified number of days
+    const decisionData = DashboardService.getDecisionChartData(days);
 
     const response: ApiResponse<any> = {
       success: true,
@@ -140,12 +120,7 @@ router.get('/chart/decisions', [
 // Get alerts by severity
 router.get('/chart/alerts-by-severity', async (req, res) => {
   try {
-    const alertsBySeverity = {
-      low: 45,
-      medium: 25,
-      high: 15,
-      critical: 4
-    };
+    const alertsBySeverity = DashboardService.getAlertsBySeverity();
 
     const response: ApiResponse<any> = {
       success: true,
@@ -162,7 +137,7 @@ router.get('/chart/alerts-by-severity', async (req, res) => {
   }
 });
 
-// Get recent activity (mock implementation)
+// Get recent activity
 router.get('/recent-activity', [
   query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50')
 ], async (req, res) => {
@@ -178,37 +153,8 @@ router.get('/recent-activity', [
 
     const limit = parseInt(req.query.limit as string) || 10;
     
-    // Mock recent activity data
-    const recentActivity = [
-      {
-        id: 'activity_001',
-        type: 'transaction',
-        description: 'New transaction from Shoprite Ghana - ₵450.00',
-        timestamp: new Date(Date.now() - 300000).toISOString(),
-        severity: 'low'
-      },
-      {
-        id: 'activity_002',
-        type: 'alert',
-        description: 'High-risk transaction flagged - ₵7,500.00',
-        timestamp: new Date(Date.now() - 600000).toISOString(),
-        severity: 'high'
-      },
-      {
-        id: 'activity_003',
-        type: 'user',
-        description: 'New user registered - analyst@finsecure.com',
-        timestamp: new Date(Date.now() - 900000).toISOString(),
-        severity: 'medium'
-      },
-      {
-        id: 'activity_004',
-        type: 'transaction',
-        description: 'Transaction denied - ₵15,000.00 to Kwame Asante',
-        timestamp: new Date(Date.now() - 1200000).toISOString(),
-        severity: 'critical'
-      }
-    ].slice(0, limit);
+    // Get real recent activity data
+    const recentActivity = DashboardService.getRecentActivity(limit);
 
     const response: ApiResponse<any[]> = {
       success: true,
@@ -218,6 +164,40 @@ router.get('/recent-activity', [
     res.json(response);
   } catch (error) {
     console.error('Get recent activity error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
+// Get top alerts
+router.get('/top-alerts', [
+  query('limit').optional().isInt({ min: 1, max: 20 }).withMessage('Limit must be between 1 and 20')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+
+    const limit = parseInt(req.query.limit as string) || 5;
+    
+    // Get real top alerts data
+    const topAlerts = DashboardService.getTopAlerts(limit);
+
+    const response: ApiResponse<any[]> = {
+      success: true,
+      data: topAlerts
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Get top alerts error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'

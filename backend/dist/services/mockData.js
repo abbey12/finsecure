@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mockRiskDistribution = exports.mockChartData = exports.mockDashboardStats = exports.mockAlerts = exports.mockTransactions = exports.mockUsers = void 0;
+exports.mockVerificationAttempts = exports.mockRiskDistribution = exports.mockChartData = exports.mockDashboardStats = exports.mockAlerts = exports.mockTransactions = exports.mockUsers = void 0;
 const types_1 = require("../types");
 exports.mockUsers = [
     {
@@ -13,7 +13,7 @@ exports.mockUsers = [
         lastLogin: new Date().toISOString(),
         createdAt: new Date('2024-01-01').toISOString(),
         status: types_1.UserStatus.ACTIVE,
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/9KzKz2K',
+        password: '$2b$12$X/qFASgzhdcMzMzyD8MYo..RdgZ8zbcE/GOCg/FA47favIXViOKDG',
     },
     {
         id: '2',
@@ -25,7 +25,7 @@ exports.mockUsers = [
         lastLogin: new Date().toISOString(),
         createdAt: new Date('2024-01-15').toISOString(),
         status: types_1.UserStatus.ACTIVE,
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/9KzKz2K',
+        password: '$2b$12$X/qFASgzhdcMzMzyD8MYo..RdgZ8zbcE/GOCg/FA47favIXViOKDG',
     },
     {
         id: '3',
@@ -37,7 +37,7 @@ exports.mockUsers = [
         lastLogin: new Date().toISOString(),
         createdAt: new Date('2024-01-10').toISOString(),
         status: types_1.UserStatus.ACTIVE,
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/9KzKz2K',
+        password: '$2b$12$X/qFASgzhdcMzMzyD8MYo..RdgZ8zbcE/GOCg/FA47favIXViOKDG',
     },
 ];
 exports.mockTransactions = [
@@ -256,5 +256,61 @@ exports.mockRiskDistribution = [
     { name: 'Low Risk', value: 12000 },
     { name: 'Medium Risk', value: 2800 },
     { name: 'High Risk', value: 620 }
+];
+exports.mockVerificationAttempts = [
+    {
+        id: 'ver_001',
+        userId: '1',
+        transactionId: 'txn_001',
+        method: types_1.VerificationMethod.ID_SCAN,
+        result: types_1.VerificationResult.SUCCESS,
+        reasons: ['ID verification successful'],
+        attemptsCount: 1,
+        createdAt: new Date('2024-01-20T10:00:00Z').toISOString(),
+        completedAt: new Date('2024-01-20T10:05:00Z').toISOString(),
+    },
+    {
+        id: 'ver_002',
+        userId: '2',
+        transactionId: 'txn_002',
+        method: types_1.VerificationMethod.LIVENESS,
+        result: types_1.VerificationResult.PENDING,
+        reasons: ['Liveness check in progress'],
+        attemptsCount: 1,
+        createdAt: new Date('2024-01-20T11:00:00Z').toISOString(),
+    },
+    {
+        id: 'ver_003',
+        userId: '3',
+        transactionId: 'txn_003',
+        method: types_1.VerificationMethod.SELFIE,
+        result: types_1.VerificationResult.FAILED,
+        reasons: ['Selfie verification failed', 'Poor image quality'],
+        attemptsCount: 2,
+        createdAt: new Date('2024-01-20T12:00:00Z').toISOString(),
+        completedAt: new Date('2024-01-20T12:10:00Z').toISOString(),
+    },
+    {
+        id: 'ver_004',
+        userId: '1',
+        transactionId: 'txn_004',
+        method: types_1.VerificationMethod.LIVENESS,
+        result: types_1.VerificationResult.EXPIRED,
+        reasons: ['Verification session expired'],
+        attemptsCount: 1,
+        createdAt: new Date('2024-01-21T09:00:00Z').toISOString(),
+        completedAt: new Date('2024-01-21T09:05:00Z').toISOString(),
+    },
+    {
+        id: 'ver_005',
+        userId: '2',
+        transactionId: 'txn_005',
+        method: types_1.VerificationMethod.ID_SCAN,
+        result: types_1.VerificationResult.SUCCESS,
+        reasons: ['ID verification successful'],
+        attemptsCount: 1,
+        createdAt: new Date('2024-01-21T14:00:00Z').toISOString(),
+        completedAt: new Date('2024-01-21T14:02:00Z').toISOString(),
+    },
 ];
 //# sourceMappingURL=mockData.js.map

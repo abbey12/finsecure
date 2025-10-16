@@ -5,13 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const express_validator_1 = require("express-validator");
-const mockData_1 = require("../services/mockData");
+const dashboardService_1 = require("../services/dashboardService");
 const router = express_1.default.Router();
 router.get('/stats', async (req, res) => {
     try {
+        const realStats = dashboardService_1.DashboardService.getRealStats();
         const response = {
             success: true,
-            data: mockData_1.mockDashboardStats
+            data: realStats
         };
         res.json(response);
     }
@@ -36,16 +37,7 @@ router.get('/chart/transactions', [
             });
         }
         const days = parseInt(req.query.days) || 7;
-        const chartData = [];
-        const today = new Date();
-        for (let i = days - 1; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            chartData.push({
-                date: date.toISOString().split('T')[0],
-                value: Math.floor(Math.random() * 200) + 50
-            });
-        }
+        const chartData = dashboardService_1.DashboardService.getTransactionChartData(days);
         const response = {
             success: true,
             data: {
@@ -64,9 +56,10 @@ router.get('/chart/transactions', [
 });
 router.get('/chart/risk-distribution', async (req, res) => {
     try {
+        const realRiskData = dashboardService_1.DashboardService.getRiskDistributionData();
         const response = {
             success: true,
-            data: mockData_1.mockRiskDistribution
+            data: realRiskData
         };
         res.json(response);
     }
@@ -91,18 +84,7 @@ router.get('/chart/decisions', [
             });
         }
         const days = parseInt(req.query.days) || 7;
-        const decisionData = [];
-        const today = new Date();
-        for (let i = days - 1; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            decisionData.push({
-                date: date.toISOString().split('T')[0],
-                allow: Math.floor(Math.random() * 100) + 50,
-                challenge: Math.floor(Math.random() * 20) + 5,
-                deny: Math.floor(Math.random() * 10) + 1
-            });
-        }
+        const decisionData = dashboardService_1.DashboardService.getDecisionChartData(days);
         const response = {
             success: true,
             data: {
@@ -121,12 +103,7 @@ router.get('/chart/decisions', [
 });
 router.get('/chart/alerts-by-severity', async (req, res) => {
     try {
-        const alertsBySeverity = {
-            low: 45,
-            medium: 25,
-            high: 15,
-            critical: 4
-        };
+        const alertsBySeverity = dashboardService_1.DashboardService.getAlertsBySeverity();
         const response = {
             success: true,
             data: alertsBySeverity
@@ -154,36 +131,7 @@ router.get('/recent-activity', [
             });
         }
         const limit = parseInt(req.query.limit) || 10;
-        const recentActivity = [
-            {
-                id: 'activity_001',
-                type: 'transaction',
-                description: 'New transaction from Shoprite Ghana - ₵450.00',
-                timestamp: new Date(Date.now() - 300000).toISOString(),
-                severity: 'low'
-            },
-            {
-                id: 'activity_002',
-                type: 'alert',
-                description: 'High-risk transaction flagged - ₵7,500.00',
-                timestamp: new Date(Date.now() - 600000).toISOString(),
-                severity: 'high'
-            },
-            {
-                id: 'activity_003',
-                type: 'user',
-                description: 'New user registered - analyst@finsecure.com',
-                timestamp: new Date(Date.now() - 900000).toISOString(),
-                severity: 'medium'
-            },
-            {
-                id: 'activity_004',
-                type: 'transaction',
-                description: 'Transaction denied - ₵15,000.00 to Kwame Asante',
-                timestamp: new Date(Date.now() - 1200000).toISOString(),
-                severity: 'critical'
-            }
-        ].slice(0, limit);
+        const recentActivity = dashboardService_1.DashboardService.getRecentActivity(limit);
         const response = {
             success: true,
             data: recentActivity
@@ -192,6 +140,34 @@ router.get('/recent-activity', [
     }
     catch (error) {
         console.error('Get recent activity error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+});
+router.get('/top-alerts', [
+    (0, express_validator_1.query)('limit').optional().isInt({ min: 1, max: 20 }).withMessage('Limit must be between 1 and 20')
+], async (req, res) => {
+    try {
+        const errors = (0, express_validator_1.validationResult)(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation failed',
+                details: errors.array()
+            });
+        }
+        const limit = parseInt(req.query.limit) || 5;
+        const topAlerts = dashboardService_1.DashboardService.getTopAlerts(limit);
+        const response = {
+            success: true,
+            data: topAlerts
+        };
+        res.json(response);
+    }
+    catch (error) {
+        console.error('Get top alerts error:', error);
         res.status(500).json({
             success: false,
             error: 'Internal server error'

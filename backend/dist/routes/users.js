@@ -11,7 +11,8 @@ router.get('/', [
     (0, express_validator_1.query)('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
     (0, express_validator_1.query)('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
     (0, express_validator_1.query)('role').optional().isIn(['admin', 'analyst', 'regular']).withMessage('Invalid role value'),
-    (0, express_validator_1.query)('status').optional().isIn(['active', 'inactive', 'suspended']).withMessage('Invalid status value')
+    (0, express_validator_1.query)('status').optional().isIn(['active', 'locked', 'suspended']).withMessage('Invalid status value'),
+    (0, express_validator_1.query)('search').optional().isString().withMessage('Search must be a string')
 ], async (req, res) => {
     try {
         const errors = (0, express_validator_1.validationResult)(req);
@@ -31,6 +32,12 @@ router.get('/', [
         }
         if (req.query.status) {
             filteredUsers = filteredUsers.filter(u => u.status === req.query.status);
+        }
+        if (req.query.search) {
+            const searchTerm = req.query.search.toLowerCase();
+            filteredUsers = filteredUsers.filter(u => u.firstName.toLowerCase().includes(searchTerm) ||
+                u.lastName.toLowerCase().includes(searchTerm) ||
+                u.email.toLowerCase().includes(searchTerm));
         }
         const paginatedUsers = filteredUsers.slice(offset, offset + limit);
         const totalPages = Math.ceil(filteredUsers.length / limit);
@@ -98,7 +105,7 @@ router.patch('/:id', [
     (0, express_validator_1.body)('lastName').optional().isString().withMessage('Last name must be a string'),
     (0, express_validator_1.body)('email').optional().isEmail().withMessage('Valid email is required'),
     (0, express_validator_1.body)('role').optional().isIn(['admin', 'analyst', 'regular']).withMessage('Invalid role value'),
-    (0, express_validator_1.body)('status').optional().isIn(['active', 'inactive', 'suspended']).withMessage('Invalid status value'),
+    (0, express_validator_1.body)('status').optional().isIn(['active', 'locked', 'suspended']).withMessage('Invalid status value'),
     (0, express_validator_1.body)('mfaEnabled').optional().isBoolean().withMessage('MFA enabled must be a boolean')
 ], async (req, res) => {
     try {

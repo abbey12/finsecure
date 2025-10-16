@@ -14,6 +14,8 @@ const transactions_1 = __importDefault(require("./routes/transactions"));
 const users_1 = __importDefault(require("./routes/users"));
 const alerts_1 = __importDefault(require("./routes/alerts"));
 const dashboard_1 = __importDefault(require("./routes/dashboard"));
+const rules_1 = __importDefault(require("./routes/rules"));
+const verification_1 = __importDefault(require("./routes/verification"));
 const errorHandler_1 = require("./middleware/errorHandler");
 const notFound_1 = require("./middleware/notFound");
 dotenv_1.default.config();
@@ -47,14 +49,9 @@ app.use('/api/transactions', transactions_1.default);
 app.use('/api/users', users_1.default);
 app.use('/api/alerts', alerts_1.default);
 app.use('/api/dashboard', dashboard_1.default);
+app.use('/api/rules', rules_1.default);
+app.use('/api/verification', verification_1.default);
 app.use(notFound_1.notFound);
 app.use(errorHandler_1.errorHandler);
-app.listen(PORT, () => {
-    console.log(`🚀 Finsecure Backend Server running on port ${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`💰 Currency: ${process.env.DEFAULT_CURRENCY || 'GHS'}`);
-    console.log(`🇬🇭 Country: ${process.env.DEFAULT_COUNTRY || 'GH'}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-});
 exports.default = app;
 //# sourceMappingURL=app.js.map

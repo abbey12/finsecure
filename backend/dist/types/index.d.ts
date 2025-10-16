@@ -102,6 +102,25 @@ export interface Alert {
     createdAt: string;
     updatedAt: string;
 }
+export declare enum RuleType {
+    AMOUNT_THRESHOLD = "amount_threshold",
+    VELOCITY_LIMIT = "velocity_limit",
+    LOCATION_ANOMALY = "location_anomaly",
+    DEVICE_CHANGE = "device_change",
+    NEW_PAYEE = "new_payee",
+    TIME_ANOMALY = "time_anomaly"
+}
+export interface RuleConfig {
+    id: string;
+    name: string;
+    description: string;
+    type: RuleType;
+    parameters: Record<string, any>;
+    isActive: boolean;
+    priority: number;
+    createdAt: string;
+    updatedAt: string;
+}
 export interface DashboardStats {
     totalTransactions: number;
     totalUsers: number;
@@ -123,6 +142,38 @@ export interface DashboardStats {
         high: number;
         critical: number;
     };
+}
+export declare enum VerificationMethod {
+    ID_SCAN = "id_scan",
+    LIVENESS = "liveness",
+    SELFIE = "selfie",
+    FINGERPRINT = "fingerprint",
+    FACE_RECOGNITION = "face_recognition",
+    SMS_CODE = "sms_code",
+    EMAIL_CODE = "email_code",
+    SECURITY_QUESTIONS = "security_questions",
+    VOICE_VERIFICATION = "voice_verification",
+    DOCUMENT_SCAN = "document_scan",
+    BIOMETRIC = "biometric",
+    PIN_VERIFICATION = "pin_verification",
+    OTP = "otp"
+}
+export declare enum VerificationResult {
+    SUCCESS = "success",
+    PENDING = "pending",
+    FAILED = "failed",
+    EXPIRED = "expired"
+}
+export interface VerificationAttempt {
+    id: string;
+    userId: string;
+    transactionId: string;
+    method: VerificationMethod;
+    result: VerificationResult;
+    reasons: string[];
+    attemptsCount: number;
+    createdAt: string;
+    completedAt?: string;
 }
 export interface ApiResponse<T> {
     success: boolean;

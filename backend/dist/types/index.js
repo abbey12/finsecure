@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AlertStatus = exports.AlertType = exports.AlertSeverity = exports.LocationSource = exports.TransactionStatus = exports.TransactionDecision = exports.TransactionChannel = exports.UserStatus = exports.UserRole = void 0;
+exports.VerificationResult = exports.VerificationMethod = exports.RuleType = exports.AlertStatus = exports.AlertType = exports.AlertSeverity = exports.LocationSource = exports.TransactionStatus = exports.TransactionDecision = exports.TransactionChannel = exports.UserStatus = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
     UserRole["ADMIN"] = "admin";
@@ -63,4 +63,36 @@ var AlertStatus;
     AlertStatus["RESOLVED"] = "resolved";
     AlertStatus["CLOSED"] = "closed";
 })(AlertStatus || (exports.AlertStatus = AlertStatus = {}));
+var RuleType;
+(function (RuleType) {
+    RuleType["AMOUNT_THRESHOLD"] = "amount_threshold";
+    RuleType["VELOCITY_LIMIT"] = "velocity_limit";
+    RuleType["LOCATION_ANOMALY"] = "location_anomaly";
+    RuleType["DEVICE_CHANGE"] = "device_change";
+    RuleType["NEW_PAYEE"] = "new_payee";
+    RuleType["TIME_ANOMALY"] = "time_anomaly";
+})(RuleType || (exports.RuleType = RuleType = {}));
+var VerificationMethod;
+(function (VerificationMethod) {
+    VerificationMethod["ID_SCAN"] = "id_scan";
+    VerificationMethod["LIVENESS"] = "liveness";
+    VerificationMethod["SELFIE"] = "selfie";
+    VerificationMethod["FINGERPRINT"] = "fingerprint";
+    VerificationMethod["FACE_RECOGNITION"] = "face_recognition";
+    VerificationMethod["SMS_CODE"] = "sms_code";
+    VerificationMethod["EMAIL_CODE"] = "email_code";
+    VerificationMethod["SECURITY_QUESTIONS"] = "security_questions";
+    VerificationMethod["VOICE_VERIFICATION"] = "voice_verification";
+    VerificationMethod["DOCUMENT_SCAN"] = "document_scan";
+    VerificationMethod["BIOMETRIC"] = "biometric";
+    VerificationMethod["PIN_VERIFICATION"] = "pin_verification";
+    VerificationMethod["OTP"] = "otp";
+})(VerificationMethod || (exports.VerificationMethod = VerificationMethod = {}));
+var VerificationResult;
+(function (VerificationResult) {
+    VerificationResult["SUCCESS"] = "success";
+    VerificationResult["PENDING"] = "pending";
+    VerificationResult["FAILED"] = "failed";
+    VerificationResult["EXPIRED"] = "expired";
+})(VerificationResult || (exports.VerificationResult = VerificationResult = {}));
 //# sourceMappingURL=index.js.map
