@@ -130,6 +130,14 @@ export const transactionsAPI = {
     const response = await api.post('/transactions', transactionData);
     return response.data;
   },
+
+  clearAllTransactions: async (): Promise<ApiResponse<{
+    clearedCount: number;
+    message: string;
+  }>> => {
+    const response = await api.delete('/transactions/clear-all');
+    return response.data;
+  },
 };
 
 // Alerts API
@@ -223,7 +231,7 @@ export const dashboardAPI = {
   },
 
   getTopAlerts: async (limit = 10): Promise<ApiResponse<Alert[]>> => {
-    const response = await api.get(`/alerts/top/${limit}`);
+    const response = await api.get(`/dashboard/top-alerts?limit=${limit}`);
     return response.data;
   },
 };
@@ -261,10 +269,16 @@ export const rulesAPI = {
   },
 };
 
-// Verification API
+// Enhanced Verification API with Multiple Verification Methods
 export const verificationAPI = {
-  startVerification: async (transactionId: string): Promise<ApiResponse<VerificationAttempt>> => {
-    const response = await api.post('/verification/start', { transactionId });
+  // Basic verification methods
+  startVerification: async (transactionId: string, requiredMethods?: VerificationMethod[]): Promise<ApiResponse<{
+    attemptId: string;
+    requiredMethods: VerificationMethod[];
+    expiresAt: string;
+    instructions: string;
+  }>> => {
+    const response = await api.post('/verification/start', { transactionId, requiredMethods });
     return response.data;
   },
 
@@ -281,6 +295,318 @@ export const verificationAPI = {
   getVerificationHistory: async (userId: string, page = 1, limit = 10, filters?: { method?: VerificationMethod, result?: VerificationResult }): Promise<ApiResponse<PaginatedResponse<VerificationAttempt>>> => {
     const params = { page, limit, ...filters };
     const response = await api.get(`/verification/users/${userId}/verifications`, { params });
+    return response.data;
+  },
+
+  // Enhanced verification methods for suspicious transactions
+  requestReVerification: async (transactionId: string, reason: string, riskLevel: 'low' | 'medium' | 'high' | 'critical'): Promise<ApiResponse<{
+    attemptId: string;
+    requiredMethods: VerificationMethod[];
+    expiresAt: string;
+    riskLevel: string;
+  }>> => {
+    const response = await api.post('/verification/request-reverification', { transactionId, reason, riskLevel });
+    return response.data;
+  },
+
+  // Biometric verification methods
+  submitBiometricVerification: async (attemptId: string, biometricData: {
+    type: 'fingerprint' | 'face' | 'voice';
+    data: string;
+    confidence?: number;
+  }): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/biometric`, biometricData);
+    return response.data;
+  },
+
+  // Document verification
+  submitDocumentVerification: async (attemptId: string, documentData: {
+    type: 'id_scan' | 'document_scan';
+    documentImage: string;
+    documentType: string;
+    extractedData?: any;
+  }): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/document`, documentData);
+    return response.data;
+  },
+
+  // SMS/Email verification
+  sendSMSVerification: async (attemptId: string, phoneNumber: string): Promise<ApiResponse<{
+    messageId: string;
+    expiresAt: string;
+  }>> => {
+    const response = await api.post(`/verification/${attemptId}/sms`, { phoneNumber });
+    return response.data;
+  },
+
+  sendEmailVerification: async (attemptId: string, email: string): Promise<ApiResponse<{
+    messageId: string;
+    expiresAt: string;
+  }>> => {
+    const response = await api.post(`/verification/${attemptId}/email`, { email });
+    return response.data;
+  },
+
+  verifySMSCode: async (attemptId: string, code: string): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/verify-sms`, { code });
+    return response.data;
+  },
+
+  verifyEmailCode: async (attemptId: string, code: string): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/verify-email`, { code });
+    return response.data;
+  },
+
+  // Security questions verification
+  getSecurityQuestions: async (attemptId: string): Promise<ApiResponse<Array<{
+    id: string;
+    question: string;
+    type: 'multiple_choice' | 'text';
+    options?: string[];
+  }>>> => {
+    const response = await api.get(`/verification/${attemptId}/security-questions`);
+    return response.data;
+  },
+
+  submitSecurityAnswers: async (attemptId: string, answers: Array<{
+    questionId: string;
+    answer: string;
+  }>): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/security-answers`, { answers });
+    return response.data;
+  },
+
+  // PIN verification
+  verifyPIN: async (attemptId: string, pin: string): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/pin`, { pin });
+    return response.data;
+  },
+
+  // OTP verification
+  generateOTP: async (attemptId: string, method: 'sms' | 'email' | 'app'): Promise<ApiResponse<{
+    otpId: string;
+    expiresAt: string;
+    maskedDestination: string;
+  }>> => {
+    const response = await api.post(`/verification/${attemptId}/otp`, { method });
+    return response.data;
+  },
+
+  verifyOTP: async (attemptId: string, otp: string, otpId: string): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/verify-otp`, { otp, otpId });
+    return response.data;
+  },
+
+  // Voice verification
+  submitVoiceVerification: async (attemptId: string, voiceData: {
+    audioBlob: string;
+    duration: number;
+    language?: string;
+  }): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/voice`, voiceData);
+    return response.data;
+  },
+
+  // Liveness detection
+  submitLivenessCheck: async (attemptId: string, livenessData: {
+    videoBlob: string;
+    challengeType: string;
+    response: any;
+  }): Promise<ApiResponse<VerificationAttempt>> => {
+    const response = await api.post(`/verification/${attemptId}/liveness`, livenessData);
+    return response.data;
+  },
+
+  // Multi-factor verification orchestration
+  getRequiredVerificationMethods: async (transactionId: string, riskScore: number): Promise<ApiResponse<{
+    methods: VerificationMethod[];
+    priority: number[];
+    timeout: number;
+  }>> => {
+    const response = await api.get(`/verification/required-methods`, { 
+      params: { transactionId, riskScore } 
+    });
+    return response.data;
+  },
+
+  // Verification status and progress
+  getVerificationProgress: async (attemptId: string): Promise<ApiResponse<{
+    completedMethods: VerificationMethod[];
+    remainingMethods: VerificationMethod[];
+    progress: number;
+    canProceed: boolean;
+  }>> => {
+    const response = await api.get(`/verification/${attemptId}/progress`);
+    return response.data;
+  },
+
+  // Cancel verification
+  cancelVerification: async (attemptId: string, reason?: string): Promise<ApiResponse<void>> => {
+    const response = await api.post(`/verification/${attemptId}/cancel`, { reason });
+    return response.data;
+  },
+
+  // Get available verification methods for user
+  getAvailableMethods: async (userId: string): Promise<ApiResponse<{
+    available: VerificationMethod[];
+    preferred: VerificationMethod[];
+    setupRequired: VerificationMethod[];
+  }>> => {
+    const response = await api.get(`/verification/users/${userId}/available-methods`);
+    return response.data;
+  },
+
+  // Setup verification method
+  setupVerificationMethod: async (userId: string, method: VerificationMethod, setupData: any): Promise<ApiResponse<{
+    setupId: string;
+    instructions: string;
+    expiresAt: string;
+  }>> => {
+    const response = await api.post(`/verification/users/${userId}/setup/${method}`, setupData);
+    return response.data;
+  },
+
+  // Get verification methods
+  getVerificationMethods: async (): Promise<ApiResponse<VerificationMethod[]>> => {
+    const response = await api.get('/verification/methods');
+    return response.data;
+  },
+};
+
+// Behavioral Analysis API
+export const behavioralAnalysisAPI = {
+  getUserBehaviorProfile: async (userId: string): Promise<ApiResponse<BehaviorProfile>> => {
+    const response = await api.get(`/behavioral-analysis/users/${userId}/profile`);
+    return response.data;
+  },
+
+  analyzeTransactionBehavior: async (transactionId: string): Promise<ApiResponse<{
+    isAnomalous: boolean;
+    confidence: number;
+    factors: string[];
+    riskScore: number;
+  }>> => {
+    const response = await api.post('/behavioral-analysis/analyze', { transactionId });
+    return response.data;
+  },
+
+  updateBehaviorProfile: async (userId: string, transactionData: any): Promise<ApiResponse<BehaviorProfile>> => {
+    const response = await api.post(`/behavioral-analysis/users/${userId}/update`, transactionData);
+    return response.data;
+  },
+
+  getBehavioralInsights: async (userId: string, timeframe?: string): Promise<ApiResponse<{
+    spendingPatterns: any;
+    timePatterns: any;
+    locationPatterns: any;
+    merchantPatterns: any;
+  }>> => {
+    const params = timeframe ? { timeframe } : {};
+    const response = await api.get(`/behavioral-analysis/users/${userId}/insights`, { params });
+    return response.data;
+  },
+
+  detectAnomalies: async (userId: string, transactionData: any): Promise<ApiResponse<{
+    anomalies: Array<{
+      type: string;
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      description: string;
+      confidence: number;
+    }>;
+    overallRisk: number;
+  }>> => {
+    const response = await api.post(`/behavioral-analysis/users/${userId}/detect-anomalies`, transactionData);
+    return response.data;
+  },
+};
+
+// Location Security API
+export const locationSecurityAPI = {
+  validateLocation: async (userId: string, location: any): Promise<ApiResponse<{
+    isTrusted: boolean;
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    factors: string[];
+    distanceFromLastTransaction?: number;
+    timeSinceLastTransaction?: number;
+  }>> => {
+    const response = await api.post('/location-security/validate', { userId, location });
+    return response.data;
+  },
+
+  getUserLocationHistory: async (userId: string, days = 30): Promise<ApiResponse<Array<{
+    location: any;
+    timestamp: string;
+    transactionId?: string;
+    riskScore: number;
+  }>>> => {
+    const response = await api.get(`/location-security/users/${userId}/history`, { params: { days } });
+    return response.data;
+  },
+
+  setLocationTrust: async (userId: string, location: any, isTrusted: boolean): Promise<ApiResponse<void>> => {
+    const response = await api.post('/location-security/trust', { userId, location, isTrusted });
+    return response.data;
+  },
+
+  getGeofencingRules: async (userId: string): Promise<ApiResponse<Array<{
+    id: string;
+    name: string;
+    center: any;
+    radius: number;
+    isActive: boolean;
+    allowedHours?: Array<{ start: number; end: number }>;
+  }>>> => {
+    const response = await api.get(`/location-security/users/${userId}/geofencing`);
+    return response.data;
+  },
+
+  createGeofencingRule: async (userId: string, rule: any): Promise<ApiResponse<any>> => {
+    const response = await api.post(`/location-security/users/${userId}/geofencing`, rule);
+    return response.data;
+  },
+};
+
+// Security Evaluation API
+export const securityEvaluationAPI = {
+  getSecurityMetrics: async (timeframe?: string): Promise<ApiResponse<{
+    fraudPreventionRate: number;
+    falsePositiveRate: number;
+    truePositiveRate: number;
+    systemAccuracy: number;
+    behavioralAnalysisEffectiveness: number;
+    locationDetectionAccuracy: number;
+    verificationSuccessRate: number;
+    averageResponseTime: number;
+  }>> => {
+    const params = timeframe ? { timeframe } : {};
+    const response = await api.get('/security-evaluation/metrics', { params });
+    return response.data;
+  },
+
+  getSecurityReport: async (startDate: string, endDate: string): Promise<ApiResponse<{
+    summary: any;
+    behavioralAnalysis: any;
+    locationSecurity: any;
+    verificationEffectiveness: any;
+    recommendations: string[];
+  }>> => {
+    const response = await api.get('/security-evaluation/report', { 
+      params: { startDate, endDate } 
+    });
+    return response.data;
+  },
+
+  runSecurityTest: async (testType: 'behavioral' | 'location' | 'verification' | 'full'): Promise<ApiResponse<{
+    testId: string;
+    status: 'running' | 'completed' | 'failed';
+    results?: any;
+  }>> => {
+    const response = await api.post('/security-evaluation/test', { testType });
+    return response.data;
+  },
+
+  getTestResults: async (testId: string): Promise<ApiResponse<any>> => {
+    const response = await api.get(`/security-evaluation/test/${testId}/results`);
     return response.data;
   },
 };

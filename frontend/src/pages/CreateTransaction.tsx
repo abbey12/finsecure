@@ -8,11 +8,13 @@ import {
   MapPinIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  XCircleIcon
+  XCircleIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { CreateTransactionRequest, TransactionChannel, TransactionDecision, LocationSource } from '../types';
-import { transactionsAPI } from '../services/api';
+import { CreateTransactionRequest, TransactionChannel, TransactionDecision, LocationSource, VerificationResult } from '../types';
+import { transactionsAPI, verificationAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import EnhancedVerification from '../components/EnhancedVerification';
 
 interface TransactionFormData {
   amount: number;
@@ -34,6 +36,8 @@ const CreateTransaction: React.FC = () => {
     transaction?: any;
     message: string;
   } | null>(null);
+  const [showVerification, setShowVerification] = useState(false);
+  const [pendingTransaction, setPendingTransaction] = useState<any>(null);
 
   const {
     register,
@@ -85,6 +89,13 @@ const CreateTransaction: React.FC = () => {
 
       const response = await transactionsAPI.createTransaction(transactionData);
       
+      // Check if transaction requires verification
+      if (response.data.decision === TransactionDecision.CHALLENGE) {
+        setPendingTransaction(response.data);
+        setShowVerification(true);
+        return;
+      }
+      
       setTransactionResult({
         success: response.success,
         transaction: response.data,
@@ -93,7 +104,7 @@ const CreateTransaction: React.FC = () => {
 
       // Redirect to transactions page after 3 seconds
       setTimeout(() => {
-        navigate('/transactions');
+        navigate('/my-transactions');
       }, 3000);
 
     } catch (error: any) {
@@ -104,6 +115,38 @@ const CreateTransaction: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleVerificationComplete = async (result: VerificationResult) => {
+    if (result === VerificationResult.SUCCESS) {
+      // Verification successful, complete the transaction
+      setTransactionResult({
+        success: true,
+        transaction: pendingTransaction,
+        message: 'Transaction verified and completed successfully'
+      });
+      setShowVerification(false);
+      
+      // Redirect to transactions page after 3 seconds
+      setTimeout(() => {
+        navigate('/my-transactions');
+      }, 3000);
+    } else {
+      // Verification failed
+      setTransactionResult({
+        success: false,
+        message: 'Verification failed. Transaction could not be completed.'
+      });
+      setShowVerification(false);
+    }
+  };
+
+  const handleVerificationCancel = () => {
+    setTransactionResult({
+      success: false,
+      message: 'Verification cancelled. Transaction was not completed.'
+    });
+    setShowVerification(false);
   };
 
   const getDecisionIcon = (decision: TransactionDecision) => {
@@ -131,6 +174,18 @@ const CreateTransaction: React.FC = () => {
         return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
+
+  // Show verification component if transaction requires verification
+  if (showVerification && pendingTransaction) {
+    return (
+      <EnhancedVerification
+        transactionId={pendingTransaction.id}
+        riskScore={pendingTransaction.riskScore}
+        onVerificationComplete={handleVerificationComplete}
+        onVerificationCancel={handleVerificationCancel}
+      />
+    );
+  }
 
   if (transactionResult) {
     return (
@@ -166,7 +221,7 @@ const CreateTransaction: React.FC = () => {
             
             <div className="mt-6">
               <button
-                onClick={() => navigate('/transactions')}
+                onClick={() => navigate('/my-transactions')}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 View All Transactions

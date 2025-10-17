@@ -15,6 +15,7 @@ import Users from './pages/Users';
 import Alerts from './pages/Alerts';
 import UserTransactions from './pages/UserTransactions';
 import UserAlerts from './pages/UserAlerts';
+import UserVerification from './pages/UserVerification';
 import { UserRole } from './types';
 
 // Protected Route component
@@ -97,6 +98,12 @@ const AppRoutes: React.FC = () => {
         <Route path="my-alerts" element={
           <RoleBasedRoute allowedRoles={[UserRole.REGULAR]}>
             <UserAlerts />
+          </RoleBasedRoute>
+        } />
+
+        <Route path="verification" element={
+          <RoleBasedRoute allowedRoles={[UserRole.REGULAR]}>
+            <UserVerification />
           </RoleBasedRoute>
         } />
         

@@ -166,6 +166,16 @@ export enum VerificationMethod {
   ID_SCAN = 'id_scan',
   LIVENESS = 'liveness',
   SELFIE = 'selfie',
+  FINGERPRINT = 'fingerprint',
+  FACE_RECOGNITION = 'face_recognition',
+  SMS_CODE = 'sms_code',
+  EMAIL_CODE = 'email_code',
+  SECURITY_QUESTIONS = 'security_questions',
+  VOICE_VERIFICATION = 'voice_verification',
+  DOCUMENT_SCAN = 'document_scan',
+  BIOMETRIC = 'biometric',
+  PIN_VERIFICATION = 'pin_verification',
+  OTP = 'otp',
 }
 
 export enum VerificationResult {

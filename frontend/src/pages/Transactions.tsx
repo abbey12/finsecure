@@ -4,7 +4,8 @@ import {
   EyeIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { Transaction, TransactionDecision, TransactionFilters } from '../types';
 import { transactionsAPI } from '../services/api';
@@ -17,6 +18,8 @@ const Transactions: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+  const [isClearing, setIsClearing] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const fetchTransactions = useCallback(async () => {
     setIsLoading(true);
@@ -35,6 +38,26 @@ const Transactions: React.FC = () => {
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
+
+  const handleClearAllTransactions = async () => {
+    setIsClearing(true);
+    try {
+      const response = await transactionsAPI.clearAllTransactions();
+      if (response.success) {
+        alert(`Successfully cleared ${response.data.clearedCount} transactions from the database`);
+        // Refresh the transactions list
+        await fetchTransactions();
+      } else {
+        alert('Failed to clear transactions');
+      }
+    } catch (error) {
+      console.error('Error clearing transactions:', error);
+      alert('Failed to clear transactions');
+    } finally {
+      setIsClearing(false);
+      setShowClearConfirm(false);
+    }
+  };
 
   const getDecisionIcon = (decision: TransactionDecision) => {
     switch (decision) {
@@ -97,12 +120,20 @@ const Transactions: React.FC = () => {
             Monitor and analyze transaction activity
           </p>
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div className="mt-4 sm:mt-0 flex space-x-3">
           <button
             type="button"
             className="btn-primary"
           >
             Export Data
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowClearConfirm(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            <TrashIcon className="h-4 w-4 mr-2" />
+            Clear All Transactions
           </button>
         </div>
       </div>
@@ -272,6 +303,43 @@ const Transactions: React.FC = () => {
                   Next
                 </button>
               </nav>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear All Transactions Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <TrashIcon className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">Clear All Transactions</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to clear all transactions from the database? This action cannot be undone.
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  This will remove all {totalResults} transactions permanently.
+                </p>
+              </div>
+              <div className="flex justify-center space-x-4 mt-4">
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearAllTransactions}
+                  disabled={isClearing}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                >
+                  {isClearing ? 'Clearing...' : 'Clear All'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

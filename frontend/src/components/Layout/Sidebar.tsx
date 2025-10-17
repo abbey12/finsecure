@@ -30,8 +30,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
     if (user?.role === UserRole.REGULAR) {
       return [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-        { name: 'My Transactions', href: '/transactions', icon: CreditCardIcon },
-        { name: 'Security Alerts', href: '/alerts', icon: ExclamationTriangleIcon },
+        { name: 'My Transactions', href: '/my-transactions', icon: CreditCardIcon },
+        { name: 'My Alerts', href: '/my-alerts', icon: ExclamationTriangleIcon },
+        { name: 'Verification', href: '/verification', icon: ShieldCheckIcon },
         { name: 'Profile', href: '/profile', icon: UserIcon },
       ];
     } else {

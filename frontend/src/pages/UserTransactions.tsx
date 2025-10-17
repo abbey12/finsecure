@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Transaction, TransactionDecision, TransactionFilters, PaginatedResponse } from '../types';
-import { transactionsAPI } from '../services/api';
+import { Transaction, TransactionDecision, TransactionFilters, PaginatedResponse, TransactionStatus } from '../types';
+import { transactionsAPI, verificationAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   CheckCircleIcon, 
@@ -8,8 +8,10 @@ import {
   XCircleIcon,
   ClockIcon,
   MapPinIcon,
-  EyeIcon
+  EyeIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
+import EnhancedVerification from '../components/EnhancedVerification';
 
 const UserTransactions: React.FC = () => {
   const { user } = useAuth();
@@ -20,6 +22,8 @@ const UserTransactions: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalResults, setTotalResults] = useState<number>(0);
   const [filters, setFilters] = useState<TransactionFilters>({});
+  const [showVerification, setShowVerification] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const transactionsPerPage = 10;
 
@@ -94,6 +98,50 @@ const UserTransactions: React.FC = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  const handleStartVerification = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setShowVerification(true);
+  };
+
+  const handleVerificationComplete = async (result: any) => {
+    if (result === 'success') {
+      // Refresh transactions to show updated status
+      const response = await transactionsAPI.getTransactions({
+        ...filters,
+        userId: user?.id,
+      }, currentPage, transactionsPerPage);
+      setTransactions(response.data.data || []);
+    }
+    setShowVerification(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleVerificationCancel = () => {
+    setShowVerification(false);
+    setSelectedTransaction(null);
+  };
+
+  const getStatusIcon = (status: TransactionStatus, decision: TransactionDecision) => {
+    if (status === TransactionStatus.PENDING && decision === TransactionDecision.CHALLENGE) {
+      return <ShieldCheckIcon className="h-5 w-5 text-yellow-500" />;
+    }
+    return getDecisionIcon(decision);
+  };
+
+  const getStatusColor = (status: TransactionStatus, decision: TransactionDecision) => {
+    if (status === TransactionStatus.PENDING && decision === TransactionDecision.CHALLENGE) {
+      return 'bg-yellow-100 text-yellow-800';
+    }
+    return getDecisionColor(decision);
+  };
+
+  const getStatusText = (status: TransactionStatus, decision: TransactionDecision) => {
+    if (status === TransactionStatus.PENDING && decision === TransactionDecision.CHALLENGE) {
+      return 'Verification Required';
+    }
+    return decision;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -108,6 +156,18 @@ const UserTransactions: React.FC = () => {
         <strong className="font-bold">Error!</strong>
         <span className="block sm:inline"> {error}</span>
       </div>
+    );
+  }
+
+  // Show verification component if needed
+  if (showVerification && selectedTransaction) {
+    return (
+      <EnhancedVerification
+        transactionId={selectedTransaction.id}
+        riskScore={selectedTransaction.riskScore}
+        onVerificationComplete={handleVerificationComplete}
+        onVerificationCancel={handleVerificationCancel}
+      />
     );
   }
 
@@ -157,7 +217,7 @@ const UserTransactions: React.FC = () => {
                         Amount
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Decision
+                        Status
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Risk Score
@@ -166,7 +226,7 @@ const UserTransactions: React.FC = () => {
                         Date
                       </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                        <span className="sr-only">View</span>
+                        <span className="sr-only">Actions</span>
                       </th>
                     </tr>
                   </thead>
@@ -183,8 +243,8 @@ const UserTransactions: React.FC = () => {
                           {formatAmount(transaction.amount, transaction.currency)}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDecisionColor(transaction.decision)}`}>
-                            {transaction.decision}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status, transaction.decision)}`}>
+                            {getStatusText(transaction.status, transaction.decision)}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{transaction.riskScore}</td>
@@ -192,9 +252,21 @@ const UserTransactions: React.FC = () => {
                           {formatDate(transaction.timestamp)}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                          <a href={`/transactions/${transaction.id}`} className="text-primary-600 hover:text-primary-900">
-                            <EyeIcon className="h-5 w-5" />
-                          </a>
+                          <div className="flex items-center space-x-2">
+                            {transaction.status === TransactionStatus.PENDING && transaction.decision === TransactionDecision.CHALLENGE ? (
+                              <button
+                                onClick={() => handleStartVerification(transaction)}
+                                className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                              >
+                                <ShieldCheckIcon className="h-3 w-3 mr-1" />
+                                Verify
+                              </button>
+                            ) : (
+                              <a href={`/transactions/${transaction.id}`} className="text-primary-600 hover:text-primary-900">
+                                <EyeIcon className="h-5 w-5" />
+                              </a>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
